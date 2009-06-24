@@ -64,6 +64,7 @@ case $reason in
 	sleep 1
 	;;
     BOUND)
+	arping -q -D -c 2 -I $netif $new_ip_address || exit 1
 	setup_interface 
 	set | while read line; do
 	    [ "${line#new_}" = "$line" ] && continue
