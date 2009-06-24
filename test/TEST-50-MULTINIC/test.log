@@ -1,0 +1,48 @@
+60+0 records in
+60+0 records out
+62914560 bytes (63 MB) copied, 0.158729 s, 396 MB/s
+mke2fs 1.41.4 (27-Jan-2009)
+Filesystem label=
+OS type: Linux
+Block size=1024 (log=0)
+Fragment size=1024 (log=0)
+15360 inodes, 61440 blocks
+3072 blocks (5.00%) reserved for the super user
+First data block=1
+Maximum filesystem blocks=62914560
+8 block groups
+8192 blocks per group, 8192 fragments per group
+1920 inodes per group
+Superblock backups stored on blocks: 
+	8193, 24577, 40961, 57345
+
+Writing inode tables: 0/81/82/83/84/85/86/87/8done                            
+Writing superblocks and filesystem accounting information: done
+
+This filesystem will be automatically checked every 27 mounts or
+180 days, whichever comes first.  Use tune2fs -c or -i to override.
+ln: creating symbolic link `mnt/bin/sh': File exists
+ln: creating symbolic link `mnt/usr/lib64/libnfsidmap_nsswitch.so.0': No such file or directory
+ln: creating symbolic link `mnt/nfs/client/bin/sh': File exists
+
+11804 blocks
+W: Possible missing firmware /lib/firmware/kaweth/trigger_code_fix.bin for module kaweth.ko
+W: Possible missing firmware /lib/firmware/kaweth/trigger_code.bin for module kaweth.ko
+W: Possible missing firmware /lib/firmware/kaweth/new_code_fix.bin for module kaweth.ko
+W: Possible missing firmware /lib/firmware/kaweth/new_code.bin for module kaweth.ko
+W: Possible missing firmware /lib/firmware/sun/cassini.bin for module cassini.ko
+ln: creating symbolic link `/tmp/initramfs.KxYIth/usr/lib64/libnfsidmap_nsswitch.so.0': No such file or directory
+
+42645 blocks
+MULTINIC TEST SETUP: Starting DHCP/NFS server
+setsockopt(IP_ADD_MEMBERSHIP): No such device
+Could not initialize device 'socket'
+Failed to start server
+cat: server.pid: Permission denied
+Usage:
+  kill pid ...              Send SIGTERM to every process listed.
+  kill signal pid ...       Send a signal to every process listed.
+  kill -s signal pid ...    Send a signal to every process listed.
+  kill -l                   List all signal names.
+  kill -L                   List all signal names in a nice table.
+  kill -l signal            Convert between signal numbers and names.
