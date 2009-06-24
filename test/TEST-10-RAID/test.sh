@@ -3,10 +3,13 @@ TEST_DESCRIPTION="root filesystem on an encrypted LVM PV"
 
 KVERSION=${KVERSION-$(uname -r)}
 
+# Uncomment this to debug failures
+#DEBUGFAIL="rdinitdebug rdnetdebug"
+
 test_run() {
-    $testdir/run-qemu -hda root.ext2 -m 512M -nographic \
+    $testdir/run-qemu -hda root.ext2 -m 128M -nographic \
 	-net none -kernel /boot/vmlinuz-$KVERSION \
-	-append "root=/dev/dracut/root rw quiet console=ttyS0,115200n81" \
+	-append "root=/dev/dracut/root rw quiet console=ttyS0,115200n81 $DEBUGFAIL" \
 	-initrd initramfs.testing
     grep -m 1 -q dracut-root-block-success root.ext2 || return 1
 }
@@ -25,7 +28,7 @@ test_setup() {
 	inst "$basedir/modules.d/40network/dhclient-script" "/sbin/dhclient-script"
 	inst "$basedir/modules.d/40network/ifup" "/sbin/ifup"
 	dracut_install grep
-	inst $testdir/test-init /sbin/init
+	inst ./test-init /sbin/init
 	find_binary plymouth >/dev/null && dracut_install plymouth
 	(cd "$initdir"; mkdir -p dev sys proc etc var/run tmp )
     )
@@ -47,7 +50,7 @@ test_setup() {
 	-f initramfs.makeroot $KVERSION || return 1
     rm -rf overlay
     # Invoke KVM and/or QEMU to actually create the target filesystem.
-    $testdir/run-qemu -hda root.ext2 -m 512M -nographic -net none \
+    $testdir/run-qemu -hda root.ext2 -m 128M -nographic -net none \
 	-kernel "/boot/vmlinuz-$kernel" \
 	-append "root=/dev/dracut/root rw rootfstype=ext2 quiet console=ttyS0,115200n81" \
 	-initrd initramfs.makeroot  || return 1

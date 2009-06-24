@@ -10,7 +10,7 @@ run_server() {
     # Start server first
     echo "NFS TEST SETUP: Starting DHCP/NFS server"
 
-    $testdir/run-qemu -hda server.ext2 -m 512M -nographic \
+    $testdir/run-qemu -hda server.ext2 -m 128M -nographic \
 	-net nic,macaddr=52:54:00:12:34:56,model=e1000 \
 	-net socket,mcast=230.0.0.1:1234 \
 	-serial udp:127.0.0.1:9999 \
@@ -42,7 +42,7 @@ client_test() {
 	return 1
     fi
 
-    $testdir/run-qemu -hda client.img -m 512M -nographic \
+    $testdir/run-qemu -hda client.img -m 128M -nographic \
   	-net nic,macaddr=$mac,model=e1000 \
   	-net socket,mcast=230.0.0.1:1234 \
   	-kernel /boot/vmlinuz-$KVERSION \
@@ -101,30 +101,20 @@ test_nfsv3() {
     # NFSv3: last octect starts at 0x00 and works up
     # NFSv4: last octect starts at 0x80 and works up
 
-    # This test must fail: dhcp root-path must have proto:...
-    client_test "NFSv3 netroot=dhcp DHCP path only" 52:54:00:12:34:00 \
- 	"netroot=dhcp" 192.168.50.1 -wsize=4096 && return 1
-
-    # This test must fail: dhcp root-path must have proto:...
     client_test "NFSv3 root=dhcp DHCP path only" 52:54:00:12:34:00 \
- 	"root=dhcp" 192.168.50.1 -wsize=4096 && return 1
+ 	"root=dhcp" 192.168.50.1 -wsize=4096 || return 1
 
-    client_test "NFSv3 root=nfs DHCP path only" 52:54:00:12:34:00 \
- 	"root=nfs" 192.168.50.1 -wsize=4096 || return 1
+    client_test "NFSv3 netroot=dhcp DHCP path only" 52:54:00:12:34:00 \
+ 	"netroot=dhcp" 192.168.50.1 -wsize=4096  || return 1
 
     client_test "NFSv3 root=/dev/nfs DHCP path only" 52:54:00:12:34:00 \
  	"root=/dev/nfs" 192.168.50.1 -wsize=4096 || return 1
 
-    # This test must fail: dhcp root-path must have proto:...
     client_test "NFSv3 netroot=dhcp DHCP IP:path" 52:54:00:12:34:01 \
- 	"netroot=dhcp" 192.168.50.2 -wsize=4096 && return 1
+ 	"netroot=dhcp" 192.168.50.2 -wsize=4096 || return 1
 
-    # This test must fail: dhcp root-path must have proto:...
     client_test "NFSv3 root=dhcp DHCP IP:path" 52:54:00:12:34:01 \
- 	"root=dhcp" 192.168.50.2 -wsize=4096 && return 1
-
-    client_test "NFSv3 root=nfs DHCP IP:path" 52:54:00:12:34:01 \
- 	"root=nfs" 192.168.50.2 -wsize=4096 || return 1
+ 	"root=dhcp" 192.168.50.2 -wsize=4096 || return 1
 
     client_test "NFSv3 root=/dev/nfs DHCP IP:path" 52:54:00:12:34:01 \
  	"root=/dev/nfs" 192.168.50.2 -wsize=4096 || return 1
@@ -145,39 +135,15 @@ test_nfsv3() {
     client_test "NFSv3 root=nfs:..." 52:54:00:12:34:04 \
  	"root=nfs:192.168.50.1:/nfs/client" 192.168.50.1 -wsize=4096 || return 1
 
-    client_test "NFSv3 nfsroot=/nfs/client" 52:54:00:12:34:04 \
-	"nfsroot=/nfs/client" 192.168.50.1 -wsize=4096 || return 1
-
-    client_test "NFSv3 nfsroot=192.168.50.2:/nfs/client" 52:54:00:12:34:04 \
-	"nfsroot=192.168.50.2:/nfs/client" 192.168.50.2 -wsize=4096 || return 1
-
     # This test must fail: root=dhcp must ignore other arguments
     client_test "NFSv3 root=dhcp nfsroot=/nfs/client" 52:54:00:12:34:04 \
 	"root=dhcp nfsroot=/nfs/client" 192.168.50.1 -wsize=4096 && return 1
 
-    client_test "NFSv3 root=nfs nfsroot=/nfs/client" 52:54:00:12:34:04 \
-	"root=nfs nfsroot=/nfs/client" 192.168.50.1 -wsize=4096 || return 1
-
-    client_test "NFSv3 root=nfs nfsroot=/nfs/%s" 52:54:00:12:34:04 \
-	"root=nfs nfsroot=/nfs/%s" 192.168.50.1 -wsize=4096 || return 1
-
-    client_test "NFSv3 root=nfs nfsroot=/nfs/ip/%s no host name (use IP)" \
-	52:54:00:12:34:7f \
-	"root=nfs nfsroot=/nfs/ip/%s \
-		ip=192.168.50.101:192.168.50.1::255.255.255.0::eth0:off" \
-	192.168.50.1 -wsize=4096 || return 1
-
-    client_test "NFSv3 root=nfs nfsroot=/nfs/client,wsize=4096" \
-	52:54:00:12:34:04 "root=nfs nfsroot=/nfs/client,wsize=4096" \
-	192.168.50.1 wsize=4096 || return 1
-
-    # This test must fail: dhcp root-path must have proto:...
     client_test "NFSv3 root=dhcp DHCP path,options" \
-	52:54:00:12:34:05 "root=dhcp" 192.168.50.1 wsize=4096 && return 1
+	52:54:00:12:34:05 "root=dhcp" 192.168.50.1 wsize=4096 || return 1
 
-    # This test must fail: dhcp root-path must have proto:...
     client_test "NFSv3 root=dhcp DHCP IP:path,options" \
-	52:54:00:12:34:06 "root=dhcp" 192.168.50.2 wsize=4096 && return 1
+	52:54:00:12:34:06 "root=dhcp" 192.168.50.2 wsize=4096 || return 1
 
     client_test "NFSv3 root=dhcp DHCP proto:IP:path,options" \
 	52:54:00:12:34:07 "root=dhcp" 192.168.50.3 wsize=4096 || return 1
@@ -187,24 +153,6 @@ test_nfsv4() {
     # There is a mandatory 90 second recovery when starting the NFSv4
     # server, so put these later in the list to avoid a pause when doing
     # switch_root
-
-    client_test "NFSv4 netroot=nfs4 DHCP path only" 52:54:00:12:34:80 \
-  	"netroot=nfs4" 192.168.50.1 -wsize=4096 || return 1
-    
-    client_test "NFSv4 root=nfs4 DHCP path only" 52:54:00:12:34:80 \
-  	"root=nfs4" 192.168.50.1 -wsize=4096 || return 1
-
-    client_test "NFSv4 root=/dev/nfs4 DHCP path only" 52:54:00:12:34:80 \
-  	"root=/dev/nfs4" 192.168.50.1 -wsize=4096 || return 1
-
-    client_test "NFSv4 netroot=nfs4 DHCP IP:path" 52:54:00:12:34:81 \
-  	"netroot=nfs4" 192.168.50.2 -wsize=4096 || return 1
-
-    client_test "NFSv4 root=nfs4 DHCP IP:path" 52:54:00:12:34:81 \
-  	"root=nfs4" 192.168.50.2 -wsize=4096 || return 1
-
-    client_test "NFSv4 root=/dev/nfs4 DHCP IP:path" 52:54:00:12:34:81 \
-  	"root=/dev/nfs4" 192.168.50.2 -wsize=4096 || return 1
 
     client_test "NFSv4 netroot=dhcp DHCP proto:IP:path" 52:54:00:12:34:82 \
  	"netroot=dhcp" 192.168.50.3 -wsize=4096 || return 1
@@ -226,32 +174,6 @@ test_nfsv4() {
 	"root=nfs4:192.168.50.1:/client" 192.168.50.1 \
 	-wsize=4096 || return 1
 
-    client_test "NFSv4 root=nfs4 nfsroot=/client" 52:54:00:12:34:84 \
-	"root=nfs4 nfsroot=/client" 192.168.50.1 -wsize=4096 || return 1
-
-    client_test "NFSv4 root=nfs4 nfsroot=192.168.50.2:/client" \
-	52:54:00:12:34:84 "root=nfs4 nfsroot=192.168.50.2:/client" \
-	192.168.50.2 -wsize=4096 || return 1
-
-    client_test "NFSv4 root=nfs4 nfsroot=path,opts" \
-	52:54:00:12:34:84 "root=nfs4 nfsroot=/client,wsize=4096" \
-	192.168.50.1 wsize=4096 || return 1
-
-    # These two only work with NFSv4 in the test suite -- NFSv3 needs
-    # a /nfs prefix due to our server configuration
-
-    client_test "NFSv4 netroot=nfs4" 52:54:00:12:34:84 \
-	"netroot=nfs4" 192.168.50.1 -wsize=4096 || return 1
-
-    client_test "NFSv4 root=nfs4" 52:54:00:12:34:84 \
-	"root=nfs4" 192.168.50.1 -wsize=4096 || return 1
-
-    client_test "NFSv4 root=nfs4 DHCP path,options" \
-	52:54:00:12:34:85 "root=nfs4" 192.168.50.1 wsize=4096 || return 1
-
-    client_test "NFSv4 root=nfs4 DHCP IP:path,options" \
-	52:54:00:12:34:86 "root=nfs4" 192.168.50.2 wsize=4096 || return 1
-
     client_test "NFSv4 root=dhcp DHCP proto:IP:path,options" \
 	52:54:00:12:34:87 "root=dhcp" 192.168.50.3 wsize=4096 || return 1
 }
@@ -264,6 +186,10 @@ test_run() {
 
     test_nfsv3 || return 1
     test_nfsv4
+    if [[ -s server.pid ]]; then
+	sudo kill -TERM $(cat server.pid)
+	rm -f server.pid
+    fi
 }
 
 test_setup() {
