@@ -52,6 +52,8 @@ netif=$interface
 case $reason in
     PREINIT)
 	ip link set $netif up
+	# Give the kernel some time to up the interface
+	sleep 1
 	;;
     BOUND)
 	setup_interface 
