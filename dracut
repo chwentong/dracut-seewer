@@ -30,7 +30,7 @@ Creates initial ramdisk images for preloading modules
                          directory instead of the system-wide installed in
                          /usr/share/dracut/modules.d.
                          Useful when running dracut from a git checkout.
-  -H, --hostonly          Host-Only mode: Install only what is needed for
+  -H, --hostonly        Host-Only mode: Install only what is needed for
                          booting the local host instead of a generic host.
   -i, --include [SOURCE] [TARGET]
                         Include the files in the SOURCE directory into the
